@@ -1,8 +1,9 @@
-import torch 
+import numpy as np
+import torch
+import torch.nn.functional as F
 from shapeless import liquid
 from torch import nn
-import torch.nn.functional as F
-import numpy as np
+
 
 #UTILS 
 def get_rays(H, W, K, c2w):
@@ -37,6 +38,7 @@ class Embedder:
     def create_emedding_fn(self):
         embed_fns = []
         d = self.input_dim
+        out_dim = 0
 
         if self.include_input:
             embed_fns.append(lambda x: x)
@@ -78,18 +80,27 @@ class Embedder:
 
 #MODEL
 
-
-@liquid
 class Nerf(nn.Module):
-    D = 8
-    W = 256
-    input_ch = 3
-    input_ch_views = 3
-    output_ch = 4
-    skips = [4]
-    use_viewdirs = False
 
-    def forward(self, x):
+    def __init__(
+        self,
+        D = 8,
+        W = 256,
+        input_ch = 3,
+        input_ch_views = 3,
+        output_ch = 4,
+        skips = [4],
+        use_viewdirs = False,
+    ):
+        super().__init__()
+        self.D = D
+        self.W = W
+        self.input_ch = input_ch
+        self.input_ch_views = input_ch_views
+        self.output_ch = output_ch
+        self.skips = skips
+        self.use_viewdirs = use_viewdirs
+
         self.pts_linear = nn.ModuleList(
             [nn.Linear(
                 self.input_ch, self.W
@@ -111,6 +122,8 @@ class Nerf(nn.Module):
 
         else:
             self.output_linear = nn.Linear(self.W, self.output_ch)
+
+    def forward(self, x):
         
         ############
         input_pts, input_views = torch.split(
@@ -173,5 +186,3 @@ class Nerf(nn.Module):
         self.views_linear[0].bias.data = torch.from_numpy(
             np.transpose(weights[idx_views_linears + 1])
         )
-
-        
