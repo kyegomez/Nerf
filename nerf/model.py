@@ -83,6 +83,7 @@ class Nerf(nn.Module):
             self.feature_linear = nn.Linear(self.W + self.W)
             self.alpha_linear = nn.Linear(self.W, 1)
             self.rgb_linear = nn.Linear(self.W//2, 3)
+            
         else:
             self.output_linear = nn.Linear(self.W, self.output_ch)
         
@@ -96,6 +97,7 @@ class Nerf(nn.Module):
         for i, layer in enumerate(self.pts_linear):
             h = self.pts_linear[i](h)
             h = F.relu(h)
+
             if i in self.skips:
                 h = torch.cat([input_pts, h], -1)
         
@@ -114,4 +116,3 @@ class Nerf(nn.Module):
         else:
             outputs = self.output_linear(h)
             return outputs
-        
