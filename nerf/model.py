@@ -82,7 +82,7 @@ class Nerf(nn.Module):
         if self.use_viewdirs:
             self.feature_linear = nn.Linear(self.W + self.W)
             self.alpha_linear = nn.Linear(self.W, 1)
-            self.rgb_linear = nn.Linear(self.W//2, 3)
+            self.rgb_linear = nn.Linear(self.W // 2, 3)
 
         else:
             self.output_linear = nn.Linear(self.W, self.output_ch)
