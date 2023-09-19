@@ -15,7 +15,18 @@ My personal implementation of the NERF paper, with much better code. Because the
 `pip install nerf-torch`
 
 # Usage
+```python
+import torch
+from nerf.model import Nerf
 
+model = Nerf()
+
+x = torch.randn(1, 6)
+
+output = model(x)
+
+print(output)
+```
 
 
 # License
