@@ -6,12 +6,12 @@ import torch.nn.functional as F
 
 @liquid
 class Embedder:
-    input_dim: int
-    include_input: bool
-    max_freq_log2: int
-    num_freqs: int
-    log_sampling: bool
-    period_fns: int
+    input_dim = None
+    include_input: False
+    max_freq_log2: None
+    num_freqs: None
+    log_sampling: False
+    period_fns: None
 
     def create_emedding_fn(self):
         embed_fns = []
@@ -83,7 +83,7 @@ class Nerf(nn.Module):
             self.feature_linear = nn.Linear(self.W + self.W)
             self.alpha_linear = nn.Linear(self.W, 1)
             self.rgb_linear = nn.Linear(self.W//2, 3)
-            
+
         else:
             self.output_linear = nn.Linear(self.W, self.output_ch)
         
