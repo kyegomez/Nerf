@@ -2,6 +2,27 @@ import torch
 from shapeless import liquid
 from torch import nn
 import torch.nn.functional as F
+import numpy as np
+
+#UTILS 
+def get_rays(H, W, K, c2w):
+    i, j = torch.meshgrid(
+        torch.linspace(0, W-1, W),
+        torch.linspace(0, H-1, H)
+    )
+    i = i.t()
+    j = j.t()
+
+    dirs = torch.stack(
+        [(i-K[0][2])/K[0][0], -(j-K[1][2])/K[1][1], -torch.ones_like(i)], -1
+    )
+
+    #rotate ray directions from camera frame to the world frame
+    rays_d = torch.sum(dirs[..., np.newaxis, :] * c2w[:3, :3], -1)
+
+    #translate camera frame origin to the world frame it is the origin of all rays
+    rays_o = c2w[:3, -1].expand(rays_d.shape)
+    return rays_o, rays_d
 
 
 @liquid
@@ -53,6 +74,10 @@ class Embedder:
         return torch.cat([
             fn(inputs) for fn in self.embed_fns
         ], -1)
+
+
+#MODEL
+
 
 @liquid
 class Nerf(nn.Module):
@@ -116,3 +141,37 @@ class Nerf(nn.Module):
         else:
             outputs = self.output_linear(h)
             return outputs
+    
+    def load_weights_keras(self, weights):
+        assert self.use_viewdirs, "Not implemented if use_viewdirs is False"
+
+        #load pts_linears
+        for i in range(self.D):
+            idx_pts_linears = 2 * i
+            self.pts_linears[i].weight.data = torch.from_numpy(
+                np.transpose(weights[idx_pts_linears])
+            )
+
+            self.pts_linears[i].bias.data = torch.from_numpy(
+                np.transpose(weights[idx_pts_linears + 1])
+            )
+        
+        #load views linears
+        idx_feature_linear = 2 * self.D
+        self.feature_linear.weight.data = torch.from_numpy(
+            np.transpose(weights[idx_feature_linear])
+        )
+        self.feature_linear.bias.data = torch.from_numpy(
+            np.transpose(weights[idx_feature_linear + 1])
+        )
+
+        #load views_linear
+        idx_views_linears = 2 * self.D + 2
+        self.views_linear[0].weight.data = torch.from_numpy(np.transpose(
+            weights[idx_views_linears]
+        ))
+        self.views_linear[0].bias.data = torch.from_numpy(
+            np.transpose(weights[idx_views_linears + 1])
+        )
+
+        

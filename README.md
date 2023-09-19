@@ -1,7 +1,7 @@
 [![Multi-Modality](agorabanner.png)](https://discord.gg/qUtxnK2NMf)
 
 # Nerf
-My personal implementation of the NERF paper, with much better code. Because the original implementation has ugly code.
+My personal implementation of the NERF paper, with much better code. Because the original implementation has ugly code and i don't understand absolutely anything there.
 
 
 [Paper Link](https://arxiv.org/abs/2003.08934)
